@@ -61,7 +61,7 @@ const communities = async (req, res) => {
         }
         if (r.admin.find((m) => m == username)) {
           r.isAdmin = true;
-        } 
+        }
       });
       res.status(200).json(result.rows);
     } else {
@@ -92,7 +92,7 @@ const communityProfile = async (req, res) => {
         }
         if (r.admin.find((m) => m == username)) {
           r.isAdmin = true;
-        } 
+        }
       });
       res.status(200).json(result.rows[0]);
     } else {
@@ -245,7 +245,7 @@ const myCommunities = async (req, res) => {
         }
         if (r.admin.find((m) => m == username)) {
           r.isAdmin = true;
-        } 
+        }
       });
       res.json(result.rows);
     } else {
@@ -275,7 +275,7 @@ const communityJoined = async (req, res) => {
         }
         if (r.admin.find((m) => m == username)) {
           r.isAdmin = true;
-        } 
+        }
       });
       res.json(result.rows);
     } else {
