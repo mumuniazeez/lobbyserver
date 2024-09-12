@@ -1,4 +1,4 @@
-# LOBBY APP SERVER
+# LOBBY SERVER
 
 Lobby is an online chatting platform for communities. Lobby makes it possible for people to connect with each other, build up communities and share important information.
 This repository contains the code for the [Lobby App](https://github.com/mumuniazeez/lobbyapp) server.
