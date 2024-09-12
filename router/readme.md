@@ -1,4 +1,4 @@
-# Lobby Routes
+# Lobby Server Routes
 
 ## Table of contents
 
