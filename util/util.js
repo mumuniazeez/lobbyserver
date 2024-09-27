@@ -13,7 +13,7 @@ const db = new pg.Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
   ssl: {
-    rejectUnauthorized: true,
+    ca: process.env.crt,
   },
 });
 
