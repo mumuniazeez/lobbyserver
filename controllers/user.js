@@ -62,7 +62,7 @@ const logIn = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error logging in" });
+    res.status(500).json({ message: "Error logging in", error });
   }
 };
 
