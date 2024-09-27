@@ -3,6 +3,7 @@ const multer = require("multer");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 dotenv.config();
+const fs = require("fs");
 
 // code to connect to the database
 const db = new pg.Pool({
@@ -11,9 +12,10 @@ const db = new pg.Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-  // ssl: {
-  //   rejectUnauthorized: false,
-  // },
+  ssl: {
+    rejectUnauthorized: true,
+    // ca: fs.readFileSync("../certificate.txt").toString(),
+  },
 });
 
 db.on("error", (err) => {
@@ -24,7 +26,6 @@ db.on("error", (err) => {
 db.on("connect", () => {
   console.log("Connected to database");
 });
-
 
 const authenticate = (req, res, next) => {
   const { JWT_SECRET } = process.env;
