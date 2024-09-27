@@ -14,7 +14,6 @@ const db = new pg.Pool({
   port: process.env.DB_PORT,
   ssl: {
     rejectUnauthorized: true,
-    // ca: fs.readFileSync("../certificate.txt").toString(),
   },
 });
 
