@@ -1,4 +1,8 @@
 const { db } = require("../util/util");
+const io = require("../socket/socket")
+
+
+
 
 const createCommunity = async (req, res) => {
   try {
@@ -23,8 +27,8 @@ const createCommunity = async (req, res) => {
       values = [username, communityId];
       result = await db.query(query, values);
       if (result.rowCount > 0) {
-        query = `INSERT INTO rooms (communityid, name, creator, enablemessage, id) VALUES ($1, $2, $3, $4, gen_random_uuid());`;
-        values = [communityId, "Announcement", username, false];
+        query = `INSERT INTO rooms (communityid, name, creator, enablemessage, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid());`;
+        values = [communityId, "Announcement", username, false, "announcement"];
         result = await db.query(query, values);
         if (result.rowCount > 0) {
           res.status(201).json({ communityId });
@@ -37,6 +41,50 @@ const createCommunity = async (req, res) => {
     } else {
       res.status(400).json({ message: "Error creating community" });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error creating community" });
+  }
+};
+
+const editCommunity = async (req, res) => {
+  try {
+    const { username } = req.user;
+    const { name, description } = req.body;
+    const { communityId } = req.params;
+    // let avatar = req.file.path;
+    // avatar.replace("public", "");
+
+    let query = `UPDATE community SET name = $1 description = $2)
+    WHERE id = $3
+    `;
+    let values = [name, description, communityId];
+    let result = await db.query(query, values);
+    if (result.rowCount > 0) {
+      query = `
+        SELECT id FROM rooms 
+        WHERE communityid = $1 and "type" = $2;
+        `;
+      values = [communityId, "announcement"];
+      //  , "announcement"
+      result = await db.query(query, values);
+      let roomId = result.rows[0].id
+      if (result.rows.length > 0) {
+        query = `INSERT INTO message (creator, communityid, roomid, message, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
+      RETURNING *;
+      `;
+        values = [username, communityId, roomId, `${username} edited community info`, "notice"];
+        result = await db.query(query, values);
+        if (result.rowCount > 0) {
+          io.to(roomId).emit("sendMessage", result.rows[0]);
+          res.json({ message: "Successfully edited community data" });
+        }
+      }
+    } else {
+      res.status(400).json({ message: "Error joining community" });
+    }
+
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating community" });
@@ -133,7 +181,7 @@ const joinCommunity = async (req, res) => {
     const { username } = req.user;
     const { communityId } = req.params;
 
-    let query = ` 
+    let query = `
       UPDATE community
       SET members = array_append(members, $1)
       WHERE id = $2;
@@ -141,7 +189,26 @@ const joinCommunity = async (req, res) => {
     let values = [username, communityId];
     let result = await db.query(query, values);
     if (result.rowCount > 0) {
-      res.json({ message: "Successfully joined community" });
+      query = `
+      SELECT id FROM rooms 
+      WHERE communityid = $1 and "type" = $2;
+      `;
+      values = [communityId, "announcement"];
+      //  , "announcement"
+      result = await db.query(query, values);
+      let roomId = result.rows[0].id
+      if (result.rows.length > 0) {
+        query = `INSERT INTO message (creator, communityid, roomid, message, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
+    RETURNING *;
+    `;
+        values = [username, communityId, roomId, `${username} joined this community`, "notice"];
+        //  , "announcement"
+        result = await db.query(query, values);
+        if (result.rowCount > 0) {
+          io.to(roomId).emit("sendMessage", result.rows[0]);
+          res.json({ message: "Successfully joined community" });
+        }
+      }
     } else {
       res.status(400).json({ message: "Error joining community" });
     }
@@ -171,7 +238,26 @@ const leaveCommunity = async (req, res) => {
       values = [username, communityId];
       result = await db.query(query, values);
       if (result.rowCount > 0) {
-        res.json({ message: "Successfully left community" });
+        query = `
+      SELECT id FROM rooms 
+      WHERE communityid = $1 and "type" = $2;
+      `;
+        values = [communityId, "announcement"];
+        //  , "announcement"
+        result = await db.query(query, values);
+        let roomId = result.rows[0].id
+        if (result.rows.length > 0) {
+          query = `INSERT INTO message (creator, communityid, roomid, message, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
+    RETURNING *;
+    `;
+          values = [username, communityId, roomId, `${username} left this community`, "notice"];
+          //  , "announcement"
+          result = await db.query(query, values);
+          if (result.rowCount > 0) {
+            io.to(roomId).emit("sendMessage", result.rows[0]);
+            res.json({ message: "Successfully left community" });
+          }
+        }
       } else {
         res.status(400).json({ message: "Error leaving community" });
       }
@@ -227,6 +313,7 @@ const removeAdmin = async (req, res) => {
 };
 
 const myCommunities = async (req, res) => {
+  announcement
   try {
     let { username } = req.query;
     !username ? (username = req.user.username) : null;
@@ -362,6 +449,7 @@ const deleteCommunity = async (req, res) => {
 
 module.exports = {
   createCommunity,
+  editCommunity,
   joinCommunity,
   leaveCommunity,
   addAdmin,

@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { db } = require("../util/util");
+const { use } = require("../socket/socket");
 
 const signUp = async (req, res) => {
   try {
@@ -9,8 +10,15 @@ const signUp = async (req, res) => {
     username = "@" + username;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const query = `INSERT INTO users (username, email, password, firstname, lastname, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())`;
-    const values = [username, email, hashedPassword, firstname, lastname];
+    const query = `INSERT INTO users (username, email, password, firstname, lastname, theme, id) VALUES ($1, $2, $3, $4, $5, $6, gen_random_uuid())`;
+    const values = [
+      username,
+      email,
+      hashedPassword,
+      firstname,
+      lastname,
+      "system",
+    ];
     const result = await db.query(query, values);
 
     if (result.rowCount > 0) {
@@ -35,11 +43,11 @@ const logIn = async (req, res) => {
     const query = `SELECT * FROM users WHERE username = $1 OR email = $1;`;
     const values = [userId];
     const result = await db.query(query, values);
-    user = result.rows[0];
+    let user = result.rows[0];
     if (result.rows.length > 0) {
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid Credentials" });
       }
       const token = jwt.sign(
         { userId: user.id, username: user.username },
@@ -48,9 +56,9 @@ const logIn = async (req, res) => {
           expiresIn: "2d",
         }
       );
-      res.json({ message: token });
+      res.json({ token });
     } else {
-      res.status(401).json({ message: "Invalid credentials" });
+      res.status(401).json({ message: "Invalid Credentials" });
     }
   } catch (error) {
     console.error(error);
@@ -63,6 +71,23 @@ const userProfile = async (req, res) => {
     const { username } = req.params;
     const query = `SELECT * FROM users WHERE username = $1;`;
     const values = [username];
+    const result = await db.query(query, values);
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving user profile" });
+  }
+};
+
+const myProfile = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const query = `SELECT * FROM users WHERE id = $1;`;
+    const values = [userId];
     const result = await db.query(query, values);
     if (result.rows.length > 0) {
       res.json(result.rows[0]);
@@ -95,6 +120,25 @@ const addUserAvatar = async (req, res) => {
   }
 };
 
+const changeTheme = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    let { theme } = req.body;
+
+    let query = `UPDATE users SET theme = $1 WHERE id = $2;`;
+    let values = [theme, userId];
+
+    const result = await db.query(query, values);
+    if (result.rowCount > 0) {
+      res.json({ message: "Theme saved" });
+    } else {
+      res.status(404).json({ message: "Error saving theme" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error saving theme" });
+  }
+};
 const addOptionalData = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -175,7 +219,9 @@ module.exports = {
   signUp,
   logIn,
   userProfile,
+  myProfile,
   addUserAvatar,
+  changeTheme,
   addOptionalData,
   deleteAccount,
 };

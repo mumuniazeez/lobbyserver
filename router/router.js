@@ -9,10 +9,13 @@ const {
   addUserAvatar,
   addOptionalData,
   deleteAccount,
+  myProfile,
+  changeTheme,
 } = require("../controllers/user");
 
 const {
   createCommunity,
+  editCommunity,
   communityProfile,
   joinCommunity,
   leaveCommunity,
@@ -37,17 +40,21 @@ const {
 router.post("/signup", signUp);
 router.post("/login", logIn);
 router.get("/user/profile/:username", userProfile);
+router.get("/user/me", authenticate, myProfile);
+
 router.post(
   "/user/avatar",
   authenticate,
   avatarUpload.single("avatar"),
   addUserAvatar
 );
+router.post("/user/changeTheme", authenticate, changeTheme);
 router.post("/user/optional", authenticate, addOptionalData);
 router.delete("/user/delete", authenticate, deleteAccount);
 
 // community routes
 router.post("/community/create", authenticate, createCommunity);
+router.post("/community/edit/:communityID", authenticate, editCommunity);
 router.get("/community/all", authenticate, communities);
 router.get("/community/profile/:communityId", authenticate, communityProfile);
 router.get("/community/rooms/:communityId", authenticate, communityRooms);

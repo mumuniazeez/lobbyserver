@@ -15,6 +15,7 @@ CREATE TABLE public.users (
 	bio varchar NULL,
 	dob date NULL,
 	avater varchar NULL,
+	theme varchar,
 	CONSTRAINT email_un UNIQUE (email),
 	CONSTRAINT users_pk PRIMARY KEY (id),
 	CONSTRAINT users_un UNIQUE (username)
@@ -51,6 +52,7 @@ CREATE TABLE public.rooms (
 	communityid uuid NOT NULL,
 	enablemessage bool NOT NULL DEFAULT true,
 	createdat timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+	"type" varchar,
 	CONSTRAINT rooms_pk PRIMARY KEY (id)
 );
 
@@ -67,5 +69,6 @@ CREATE TABLE public.message (
 	communityid uuid NOT NULL,
 	roomid uuid NOT NULL,
 	createdat timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+	"type" varchar,
 	CONSTRAINT message_pk PRIMARY KEY (id)
 );

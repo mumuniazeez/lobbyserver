@@ -5,9 +5,9 @@ const createRoom = async (req, res) => {
     const { username } = req.user;
     const { communityId } = req.params;
     const { name, enableMessage } = req.body;
-    const query = `INSERT INTO rooms (communityid, name, enablemessage, creator, id) VALUES ($1, $2, $3, $4, gen_random_uuid())
+    const query = `INSERT INTO rooms (communityid, name, enablemessage, creator, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
     RETURNING id;`;
-    const values = [communityId, name, enableMessage, username];
+    const values = [communityId, name, enableMessage, username, "normal"];
     const result = await db.query(query, values);
     let roomId = result.rows[0].id;
     if (result.rowCount > 0) {
