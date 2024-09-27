@@ -1,7 +1,7 @@
 const { sendMessage, getMessages } = require("../controllers/message");
 const { Server } = require("socket.io");
 
-let io = new Server(3005, {
+let io = new Server(3000, {
   cors: {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -10,7 +10,7 @@ let io = new Server(3005, {
 
 io.on("connection", (socket) => {
   console.log("New user connected:", socket.id);
-  
+
   socket.on("joinRoom", async (messageInfo) => {
     socket.join(messageInfo.roomId);
     console.log("User joined a room:", messageInfo.username);
