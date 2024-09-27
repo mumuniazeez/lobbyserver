@@ -139,6 +139,7 @@ const changeTheme = async (req, res) => {
     res.status(500).json({ message: "Error saving theme" });
   }
 };
+
 const addOptionalData = async (req, res) => {
   try {
     const { userId } = req.user;
