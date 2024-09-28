@@ -1,8 +1,5 @@
 const { db } = require("../util/util");
-const io = require("../socket/socket")
-
-
-
+const io = require("../socket/socket");
 
 const createCommunity = async (req, res) => {
   try {
@@ -68,12 +65,18 @@ const editCommunity = async (req, res) => {
       values = [communityId, "announcement"];
       //  , "announcement"
       result = await db.query(query, values);
-      let roomId = result.rows[0].id
+      let roomId = result.rows[0].id;
       if (result.rows.length > 0) {
         query = `INSERT INTO message (creator, communityid, roomid, message, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
       RETURNING *;
       `;
-        values = [username, communityId, roomId, `${username} edited community info`, "notice"];
+        values = [
+          username,
+          communityId,
+          roomId,
+          `${username} edited community info`,
+          "notice",
+        ];
         result = await db.query(query, values);
         if (result.rowCount > 0) {
           io.to(roomId).emit("sendMessage", result.rows[0]);
@@ -83,8 +86,6 @@ const editCommunity = async (req, res) => {
     } else {
       res.status(400).json({ message: "Error joining community" });
     }
-
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating community" });
@@ -104,10 +105,10 @@ const communities = async (req, res) => {
     if (result.rows.length > 0) {
       let resp = result.rows;
       resp.forEach((r) => {
-        if (r.members.find((m) => m == username)) {
+        if (r.members.find((m) => m === username)) {
           r.isInCommunity = true;
         }
-        if (r.admin.find((m) => m == username)) {
+        if (r.admin.find((m) => m === username)) {
           r.isAdmin = true;
         }
       });
@@ -135,10 +136,10 @@ const communityProfile = async (req, res) => {
     if (result.rows.length > 0) {
       let resp = result.rows;
       resp.forEach((r) => {
-        if (r.members.find((m) => m == username)) {
+        if (r.members.find((m) => m === username)) {
           r.isInCommunity = true;
         }
-        if (r.admin.find((m) => m == username)) {
+        if (r.admin.find((m) => m === username)) {
           r.isAdmin = true;
         }
       });
@@ -196,12 +197,18 @@ const joinCommunity = async (req, res) => {
       values = [communityId, "announcement"];
       //  , "announcement"
       result = await db.query(query, values);
-      let roomId = result.rows[0].id
+      let roomId = result.rows[0].id;
       if (result.rows.length > 0) {
         query = `INSERT INTO message (creator, communityid, roomid, message, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
     RETURNING *;
     `;
-        values = [username, communityId, roomId, `${username} joined this community`, "notice"];
+        values = [
+          username,
+          communityId,
+          roomId,
+          `${username} joined this community`,
+          "notice",
+        ];
         //  , "announcement"
         result = await db.query(query, values);
         if (result.rowCount > 0) {
@@ -245,12 +252,18 @@ const leaveCommunity = async (req, res) => {
         values = [communityId, "announcement"];
         //  , "announcement"
         result = await db.query(query, values);
-        let roomId = result.rows[0].id
+        let roomId = result.rows[0].id;
         if (result.rows.length > 0) {
           query = `INSERT INTO message (creator, communityid, roomid, message, type, id) VALUES ($1, $2, $3, $4, $5, gen_random_uuid())
     RETURNING *;
     `;
-          values = [username, communityId, roomId, `${username} left this community`, "notice"];
+          values = [
+            username,
+            communityId,
+            roomId,
+            `${username} left this community`,
+            "notice",
+          ];
           //  , "announcement"
           result = await db.query(query, values);
           if (result.rowCount > 0) {
@@ -313,7 +326,7 @@ const removeAdmin = async (req, res) => {
 };
 
 const myCommunities = async (req, res) => {
-  announcement
+  announcement;
   try {
     let { username } = req.query;
     !username ? (username = req.user.username) : null;
@@ -327,10 +340,10 @@ const myCommunities = async (req, res) => {
     if (result.rowCount > 0) {
       let resp = result.rows;
       resp.forEach((r) => {
-        if (r.members.find((m) => m == username)) {
+        if (r.members.find((m) => m === username)) {
           r.isInCommunity = true;
         }
-        if (r.admin.find((m) => m == username)) {
+        if (r.admin.find((m) => m === username)) {
           r.isAdmin = true;
         }
       });
@@ -356,11 +369,11 @@ const communityJoined = async (req, res) => {
     if (result.rowCount > 0) {
       let resp = result.rows;
       resp.forEach((r) => {
-        if (r.members.find((m) => m == username)) {
+        if (r.members.find((m) => m === username)) {
           r.isInCommunity = true;
           r.username = username;
         }
-        if (r.admin.find((m) => m == username)) {
+        if (r.admin.find((m) => m === username)) {
           r.isAdmin = true;
         }
       });
@@ -385,10 +398,10 @@ const communitySearch = async (req, res) => {
     if (result.rowCount > 0) {
       let resp = result.rows;
       resp.forEach((r) => {
-        if (r.members.find((m) => m == username)) {
+        if (r.members.find((m) => m === username)) {
           r.isInCommunity = true;
         }
-        if (r.admin.find((m) => m == username)) {
+        if (r.admin.find((m) => m === username)) {
           r.isAdmin = true;
         }
       });
@@ -412,7 +425,7 @@ const deleteCommunity = async (req, res) => {
       `;
     let values = [communityId];
     let community = await db.query(query, values);
-    if (community.rows[0].creator == username) {
+    if (community.rows[0].creator === username) {
       query = `
       DELETE FROM community
       WHERE id = $1;
