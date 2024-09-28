@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const router = require("./router/router");
+const io = require("./socket/socket");
 
 let app = express();
 app.use(cors());
@@ -12,6 +13,10 @@ app.use("/", router);
 
 dotenv.config();
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+let port = process.env.serverPort || 5000;
+
+let mainServer = app.listen(port, () => {
+  console.log("Server is running on port " + port);
 });
+
+io.listen(mainServer);

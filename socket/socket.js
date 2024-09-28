@@ -1,7 +1,7 @@
 const { sendMessage, getMessages } = require("../controllers/message");
 const { Server } = require("socket.io");
 
-let io = new Server(3000, {
+let io = new Server({
   cors: {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],

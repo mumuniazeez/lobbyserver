@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { db } = require("../util/util");
-const { use } = require("../socket/socket");
 
 const signUp = async (req, res) => {
   try {
