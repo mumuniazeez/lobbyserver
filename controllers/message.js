@@ -15,12 +15,14 @@ const sendMessage = async (messageInfo) => {
     console.error(error);
   }
 };
+
 const getMessages = async (messageInfo) => {
   try {
     const { username, communityId, roomId } = messageInfo;
 
     let query = `SELECT * FROM message 
-    WHERE roomId = $1 and communityId = $2
+    WHERE roomId = $1 and communityId = $2 
+    ORDER BY createdat ASC
     `;
     let values = [roomId, communityId];
     let result = await db.query(query, values);
@@ -30,7 +32,51 @@ const getMessages = async (messageInfo) => {
   }
 };
 
+const editMessage = async (messageInfo) => {
+  const { message, id, roomId } = messageInfo;
+
+  try {
+    let query = `UPDATE message SET message = $1, type = $2 WHERE id = $3`;
+    let values = [message, "edited", id];
+    let result = await db.query(query, values);
+    if (result.rowCount > 0) {
+      query = `SELECT * FROM message 
+      WHERE roomId = $1
+      ORDER BY createdat ASC
+      `;
+      values = [roomId];
+      result = await db.query(query);
+      return result.rows;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const deleteMessage = async (messageInfo) => {
+  const { id, roomId } = messageInfo;
+  try {
+    let query = `UPDATE message SET message = $1, type = $2 WHERE id = $3`;
+    let values = ["This message is deleted", "deleted", id];
+    let result = await db.query(query, values);
+    if (result.rowCount > 0) {
+      query = `SELECT * FROM message 
+      WHERE roomId = $1
+      ORDER BY createdat ASC
+      `;
+      values = [roomId];
+      result = await db.query(query, values);
+
+      return result.rows;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 module.exports = {
   sendMessage,
   getMessages,
+  editMessage,
+  deleteMessage,
 };

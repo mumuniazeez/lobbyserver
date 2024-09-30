@@ -1,4 +1,9 @@
-const { sendMessage, getMessages } = require("../controllers/message");
+const {
+  sendMessage,
+  getMessages,
+  editMessage,
+  deleteMessage,
+} = require("../controllers/message");
 const { Server } = require("socket.io");
 
 let io = new Server({
@@ -15,7 +20,7 @@ io.on("connection", (socket) => {
     socket.join(messageInfo.roomId);
     console.log("User joined a room:", messageInfo.username);
     let msg = await getMessages(messageInfo);
-    socket.emit("prevMessages", msg);
+    io.to(messageInfo.roomId).emit("prevMessages", msg);
   });
 
   socket.on("leaveRoom", async (messageInfo) => {
@@ -28,9 +33,16 @@ io.on("connection", (socket) => {
     io.to(messageInfo.roomId).emit("sendMessage", msg);
   });
 
-  //   socket.on("sendNotification", async (messageInfo) => {
-  //     io.emit("sendNotification", messageInfo);
-  //   });
+  socket.on("editMessage", async (messageInfo) => {
+    let msg = await editMessage(messageInfo);
+    io.to(messageInfo.roomId).emit("prevMessages", msg);
+  });
+
+  socket.on("deleteMessage", async (messageInfo) => {
+    let msg = await deleteMessage(messageInfo);
+    io.to(messageInfo.roomId).emit("prevMessages", msg);
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
