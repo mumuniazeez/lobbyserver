@@ -9,7 +9,7 @@ const signUp = async (req, res) => {
     username = "@" + username;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const query = `INSERT INTO users (username, email, password, firstname, lastname, theme, id) VALUES ($1, $2, $3, $4, $5, $6, gen_random_uuid())`;
+    const query = `INSERT INTO users (username, email, password, firstname, lastname, theme, language, id) VALUES ($1, $2, $3, $4, $5, $6, $7, gen_random_uuid())`;
     const values = [
       username,
       email,
@@ -17,6 +17,7 @@ const signUp = async (req, res) => {
       firstname,
       lastname,
       "system",
+      "en",
     ];
     const result = await db.query(query, values);
 
@@ -27,7 +28,12 @@ const signUp = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error creating user" });
+    res
+      .status(500)
+      .json({
+        message:
+          "Error creating user <br/> This may be because the email is already used.",
+      });
   }
 };
 
@@ -139,6 +145,26 @@ const changeTheme = async (req, res) => {
   }
 };
 
+const changeLanguage = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    let { language } = req.body;
+
+    let query = `UPDATE users SET language = $1 WHERE id = $2;`;
+    let values = [language, userId];
+
+    const result = await db.query(query, values);
+    if (result.rowCount > 0) {
+      res.json({ message: "Language saved" });
+    } else {
+      res.status(404).json({ message: "Error saving language" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error saving theme" });
+  }
+};
+
 const addOptionalData = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -222,6 +248,7 @@ module.exports = {
   myProfile,
   addUserAvatar,
   changeTheme,
+  changeLanguage,
   addOptionalData,
   deleteAccount,
 };

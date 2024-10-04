@@ -11,6 +11,7 @@ const {
   deleteAccount,
   myProfile,
   changeTheme,
+  changeLanguage,
 } = require("../controllers/user");
 
 const {
@@ -49,6 +50,7 @@ router.post(
   addUserAvatar
 );
 router.post("/user/changeTheme", authenticate, changeTheme);
+router.post("/user/changeLanguage", authenticate, changeLanguage);
 router.post("/user/optional", authenticate, addOptionalData);
 router.delete("/user/delete", authenticate, deleteAccount);
 

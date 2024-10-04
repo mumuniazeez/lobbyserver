@@ -44,7 +44,7 @@ const editMessage = async (messageInfo) => {
       WHERE roomId = $1
       ORDER BY createdat ASC
       `;
-      values = [roomId];
+      values = [roomzId];
       result = await db.query(query);
       return result.rows;
     }
